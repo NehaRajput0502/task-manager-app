@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>coditbyneha — Task Manager</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- ===== TOP BAR ===== -->
+    <header class="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]">
+      <div class="max-w-[600px] mx-auto px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="display grid place-items-center w-[30px] h-[30px] rounded-[9px] bg-[var(--accent)] text-white font-bold text-[12px]">&lt;/&gt;</div>
+          <span class="display text-[18px] font-bold tracking-tight">coditbyneha</span>
+        </div>
+        <button id="themeToggle" class="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[13px] font-medium text-[var(--text-2)] hover:text-[var(--text)] hover:border-[var(--border-strong)] transition" aria-label="Toggle theme">
+          <span id="themeIcon">🌙</span>
+          <span id="themeText">Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===== APP ===== -->
+    <div class="max-w-[600px] mx-auto px-5">
+      <!-- Greeting -->
+      <section class="pt-9 pb-1.5">
+        <h1 id="greeting" class="display text-[30px] font-bold leading-[1.08] tracking-tight">Hello.</h1>
+        <p id="subtitle" class="mt-1.5 text-[15px] text-[var(--text-2)]">Let's get organised.</p>
+      </section>
+
+      <!-- Progress -->
+      <section class="my-6">
+        <div class="flex items-baseline justify-between mb-2">
+          <span class="text-[12px] font-semibold uppercase tracking-wider text-[var(--text-2)]">Progress</span>
+          <span id="progressPct" class="display text-[14px] font-bold text-[var(--accent)]">0%</span>
+        </div>
+        <div class="h-2 rounded-full bg-[var(--surface-2)] overflow-hidden">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </section>
+
+      <!-- Composer -->
+      <div id="composer" class="composer-card">
+        <div class="flex items-center gap-2.5">
+          <span id="composerDot" class="w-2.5 h-2.5 rounded-full shrink-0 transition-colors"></span>
+          <input type="text" id="taskInput" maxlength="160" autocomplete="off"
+            class="flex-1 min-w-0 bg-transparent border-0 outline-none text-[15px] text-[var(--text)] placeholder:text-[var(--text-2)] py-1"
+            placeholder="Add a task… use #tags" />
+        </div>
+        <div class="composer__row2">
+          <select id="prioritySelect" class="composer__sel" aria-label="Priority">
+            <option value="low">🟢 Low</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="high">🔴 High</option>
+          </select>
+          <input type="date" id="dueInput" class="composer__date" aria-label="Due date" />
+          <div class="flex-1"></div>
+          <button id="addBtn" class="composer__add" aria-label="Add task">+</button>
+        </div>
+      </div>
+
+      <!-- Toolbar: search + actions -->
+      <div class="flex items-center gap-2 mt-5 mb-3.5">
+        <div class="search">
+          <span aria-hidden="true">🔍</span>
+          <input id="searchInput" type="text" autocomplete="off" placeholder="Search tasks or #tags…" />
+        </div>
+        <button id="insightsBtn" class="tbtn" aria-label="Insights" title="Insights (i)">📊</button>
+        <button id="exportBtn" class="tbtn" aria-label="Export tasks" title="Export (e)">⬇️</button>
+        <button id="importBtn" class="tbtn" aria-label="Import tasks" title="Import">⬆️</button>
+        <button id="helpBtn" class="tbtn" aria-label="Keyboard shortcuts" title="Shortcuts (?)">⌨️</button>
+        <input id="importFile" type="file" accept="application/json,.json" class="hidden" />
+      </div>
+
+      <!-- Active tag filter -->
+      <div id="tagbar" class="tagbar" hidden>
+        <span>Filtering by</span>
+        <span class="tagchip">#<span id="tagbarLabel"></span><button id="tagbarClear" aria-label="Clear tag filter">✕</button></span>
+      </div>
+
+      <!-- Insights panel -->
+      <div id="insightsPanel" class="panel" hidden>
+        <div class="ins">
+          <div class="ring" id="insRing"><div class="ring__inner" id="insPct">0%</div></div>
+          <div class="statgrid">
+            <div class="stat"><b id="insTotal">0</b><span>Total</span></div>
+            <div class="stat"><b id="insActive">0</b><span>Active</span></div>
+            <div class="stat"><b id="insDone">0</b><span>Done</span></div>
+            <div class="stat over"><b id="insOverdue">0</b><span>Overdue</span></div>
+          </div>
+        </div>
+        <div class="pbars">
+          <div class="pbar"><span class="pbar__label">🟢 Low</span><div class="pbar__track"><div class="pbar__fill low" id="barLow"></div></div><span class="pbar__n" id="cntLow">0</span></div>
+          <div class="pbar"><span class="pbar__label">🟡 Med</span><div class="pbar__track"><div class="pbar__fill med" id="barMed"></div></div><span class="pbar__n" id="cntMed">0</span></div>
+          <div class="pbar"><span class="pbar__label">🔴 High</span><div class="pbar__track"><div class="pbar__fill high" id="barHigh"></div></div><span class="pbar__n" id="cntHigh">0</span></div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex gap-1 w-fit p-1 rounded-[11px] bg-[var(--surface-2)] mb-3.5">
+        <button class="filter is-active" data-filter="all">All</button>
+        <button class="filter" data-filter="active">Active</button>
+        <button class="filter" data-filter="completed">Done</button>
+        <button class="filter" data-filter="overdue">Overdue</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="text-center py-[54px]">
+        <div class="empty__art">🗒️</div>
+        <p class="empty__title display text-[17px] font-bold">Nothing here yet</p>
+        <p class="empty__sub mt-1 text-[14px] text-[var(--text-2)]">Add your first task above to get started.</p>
+      </div>
+
+      <!-- Task list -->
+      <ul id="taskList" class="flex flex-col gap-2.5 list-none m-0 p-0"></ul>
+
+      <footer class="text-center text-[12px] text-[var(--text-2)] opacity-70 py-8">Built with HTML · CSS · JavaScript · Tailwind</footer>
+    </div>
+
+    <!-- ===== HELP MODAL ===== -->
+    <div id="helpModal" class="modal" hidden>
+      <div class="modal__card">
+        <h2 class="modal__title">Keyboard shortcuts <button class="modal__close" id="helpClose" aria-label="Close">✕</button></h2>
+        <div class="kbd-row"><span>Focus new task</span><span><kbd>/</kbd> or <kbd>n</kbd></span></div>
+        <div class="kbd-row"><span>Add task</span><kbd>Enter</kbd></div>
+        <div class="kbd-row"><span>Cycle filter</span><kbd>f</kbd></div>
+        <div class="kbd-row"><span>Toggle insights</span><kbd>i</kbd></div>
+        <div class="kbd-row"><span>Export tasks</span><kbd>e</kbd></div>
+        <div class="kbd-row"><span>Show this help</span><kbd>?</kbd></div>
+        <div class="kbd-row"><span>Clear / close</span><kbd>Esc</kbd></div>
+      </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
